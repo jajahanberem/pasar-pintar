@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Berkah Bpk Ayi - Modern Marketplace Version</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary: #1e3799;
+            --secondary: #05c46b;
+            --background: #f8f9fa;
+            --text-main: #2f3542;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background); margin: 0; padding: 0; color: var(--text-main);
+        }
+        
+        /* HEADER ALA E-COMMERCE PREMIUM */
+        header {
+            background: linear-gradient(135deg, #0a3d62 0%, #1e3799 100%);
+            color: #fff; padding: 20px 15px; text-align: center;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.5px; }
+        header p { margin: 6px 0 0 0; opacity: 0.85; font-size: 13px; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
+        
+        /* NAVIGASI MENU MODERN (TABS) */
+        .folder-navigation {
+            display: flex; gap: 10px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        .folder-navigation::-webkit-scrollbar { display: none; }
+        .folder-btn {
+            flex: 1; min-width: 140px; padding: 12px 8px; background: #fff; border: 1px solid #e1e8ed; 
+            border-radius: 12px; font-size: 13px; font-weight: 700; color: #747d8c; cursor: pointer; 
+            text-align: center; transition: all 0.3s ease; box-shadow: var(--card-shadow);
+        }
+        .folder-btn.active {
+            background: var(--primary); color: #fff; border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .folder-content { display: none; animation: fadeIn 0.4s ease; }
+        .folder-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* LAYOUT UTAMA MESIN KASIR */
+        .kasir-layout { display: grid; grid-template-columns: 1.3fr 1.14fr; gap: 20px; }
+        @media (max-width: 1200px) { .kasir-layout { grid-template-columns: 1fr; } }
+
+        .section-title { font-size: 18px; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #0a3d62; display: flex; align-items: center; gap: 8px;}
+        .card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--card-shadow); margin-bottom: 20px; box-sizing: border-box;}
+
+        /* SCANNER & KATALOG BARANG */
+        .search-box { 
+            width: 100%; padding: 14px; border: 2px solid #e1e8ed; border-radius: 12px; 
+            box-sizing: border-box; font-size: 14px; transition: all 0.3s; background: #f1f2f6;
+        }
+        .search-box:focus { border-color: var(--primary); background: #fff; outline: none; }
+        
+        .btn-kamera { 
+            background: linear-gradient(135deg, #a55eea 0%, #8854d0 100%); color: white; 
+            border: none; padding: 12px; border-radius: 12px; font-weight: bold; width: 100%; 
+            margin-bottom: 15px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(136, 84, 208, 0.3);
+        }
+        #reader, #reader-input { width: 100%; max-width: 400px; margin: 0 auto 15px auto; border-radius: 12px; overflow: hidden; display: none; border: 3px solid #8854d0;}
+
+        /* ETALASE KATALOG GRID */
+        .filter-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .filter-badge { 
+            padding: 8px 16px; background: #e1e8ed; border-radius: 20px; font-size: 12px; 
+            font-weight: 700; cursor: pointer; white-space: nowrap; color: #2f3542; transition: 0.2s;
+        }
+        .filter-badge.active { background: var(--secondary); color: white; }
+
+        .katalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; max-height: 450px; overflow-y: auto; padding: 5px; }
+        
+        /* KARTU PRODUK */
+        .product-card { 
+            background: #fff; border: 1px solid #f1f2f6; border-radius: 14px; padding: 12px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;
+            position: relative; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .product-card:hover { transform: scale(1.03); box-shadow: 0 6px 15px rgba(0,0,0,0.08); border-color: var(--primary); }
+        .product-card .cat-tag { font-size: 10px; font-weight: 800; color: var(--primary); background: #e8f0fe; padding: 2px 6px; border-radius: 6px; align-self: flex-start; margin-bottom: 6px; }
+        .product-card .p-name { font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; line-height: 1.3; }
+        .product-card .p-price { font-size: 14px; font-weight: 800; color: #ff4757; margin: 0 0 4px 0; }
+        .product-card .p-pack-info { font-size: 11px; color: #20bf6b; font-weight: 600; margin-bottom: 6px;}
+        .product-card .p-stock { font-size: 11px; color: #a4b0be; font-weight: 600; }
+        .product-card .p-stock span { font-weight: 700; }
+        .product-card .add-badge { position: absolute; bottom: 10px; right: 10px; background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+
+        /* DETAIL BELANJAAN TABLE */
+        .cart-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .cart-table th { text-align: left; padding: 10px; background: #f1f2f6; font-weight: 700; color: #57606f; }
+        .cart-table td { padding: 12px 10px; border-bottom: 1px solid #f1f2f6; }
+
+        /* INPUT GRUP BARU UNTUK GROSIR */
+        .row-grosir-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+
+        /* PREVIEW STRUK NOTA KASIR */
+        #nota-container {
+            background: #fff; padding: 15px; border-radius: 8px; border: 1px dashed #2f3542; font-family: 'Courier New', Courier, monospace; color: #000; font-size: 12px;
+        }
+        .nota-header { text-align: center; border-bottom: 1px dashed #333; padding-bottom: 8px; margin-bottom: 8px; }
+        .nota-total { border-top: 1px dashed #333; margin-top: 8px; padding-top: 6px; text-align: right; font-weight: bold; font-size: 13px;}
+        .struk-row-input { margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .struk-input-box { width: 85px; padding: 4px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+
+        /* ACTION BUTTONS */
+        button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        .btn-success { background: linear-gradient(135deg, #10ac84 0%, #05c46b 100%); color: white; box-shadow: 0 4px 10px rgba(5, 196, 107, 0.3); }
+        .btn-blue { background: linear-gradient(135deg, #2980b9 0%, #1e3799 100%); color: white; box-shadow: 0 4px 10px rgba(30, 55, 153, 0.3); }
+        .btn-orange { background: linear-gradient(135deg, #ff9f43 0%, #ee5253 100%); color: white; box-shadow: 0 4px 10px rgba(238, 82, 83, 0.3); }
+        .btn-secondary { background: #747d8c; color: white; }
+
+        /* REKAP MODAL */
+        .laporan-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .summary-box { background: #f1f2f6; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 800; border-left: 5px solid var(--primary); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+
+        .no-print { display: inline-block; }
+        @media print {
+            body * { visibility: hidden; }
+            #nota-container, #nota-container * { visibility: visible; }
+            #nota-container { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🛒 Toko Ayi Toys & ATK</h1>
+    <p>Aplikasi Kasir Pintar - Fitur Penjualan Multi-Satuan (Pcs, Pak & Lusin)</p>
+</header>
+
+<div class="container">
+    <div class="folder-navigation">
+        <button class="folder-btn active" onclick="bukaFolder(event, 'folder-kasir')">🛍️ ETALASE KASIR</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-input')">➕ DAFTAR BARANG BARU</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-stok')">📦 STOK GUDANG TOKO</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-laporan')">📈 LAPORAN UNTUNG</button>
+    </div>
+
+    <div id="folder-kasir" class="folder-content active">
+        <div class="kasir-layout">
+            
+            <div>
+                <div class="card">
+                    <h3 class="section-title">🔍 Scanner & Pencarian Cepat</h3>
+                    <button class="btn-kamera" id="btn-toggle-camera" onclick="toggleKameraHP('KASIR')">📸 Nyalakan Kamera Scan HP</button>
+                    <div id="reader"></div>
+                    <input type="text" id="scanner-input" class="search-box" placeholder="Ketik nama produk atau scan barcode di sini..." onkeypress="handleBarcodeScan(event)" oninput="filterKatalog()">
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🏪 Etalase Produk Toko</h3>
+                    <div class="filter-scroll" id="katalog-filter-badges"></div>
+                    <div class="katalog-grid" id="katalog-produk-area"></div>
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🛒 Keranjang Belanja Konsumen</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="cart-table">
+                            <thead>
+                                <tr><th>Produk</th><th style="text-align:center; width:100px;">Satuan</th><th style="text-align:center; width:60px;">Qty</th><th style="text-align:right;">Subtotal</th><th style="width:10px;"></th></tr>
+                            </thead>
+                            <tbody id="keranjang-list-kasir"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3 class="section-title">📄 Lembar Struk Pembayaran</h3>
+                    <div id="nota-container">
+                        <div class="nota-header">
+                            <h3 style="margin:0; font-size:14px;">TOKO AYI TOYS & ATK</h3>
+                            <p style="margin:2px 0;">Kelontongan, Mainan & Alat Kantor<br>Cicalengka, Jawa Barat</p>
+                            <p style="text-align: left; font-size: 10px; margin-top: 10px;" id="nota-waktu"></p>
+                        </div>
+                        <table style="width: 100%; font-family: monospace; font-size:11px;">
+                            <thead>
+                                <tr style="border-bottom: 1px dashed #333;">
+                                    <th style="padding: 2px 0; text-align: left; background:none; color:#000;">Item</th>
+                                    <th style="padding: 2px 0; text-align: center; background:none; color:#000;">Qty</th>
+                                    <th style="padding: 2px 0; text-align: right; background:none; color:#000;">Total</th>
+                                    <th class="no-print" style="background:none; width: 2px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="nota-items"></tbody>
+                        </table>
+                        
+                        <div class="struk-row-input" style="margin-top:10px;">
+                            <span>Metode:</span>
+                            <div>
+                                <select id="nota-metode-bayar" class="no-print" style="width:90px; padding:2px;" onchange="toggleMetodeBayar()">
+                                    <option value="TUNAI">TUNAI</option><option value="QRIS">QRIS</option><option value="TRANSFER">TRANSFER</option>
+                                </select>
+                                <span id="nota-metode-Cetak" style="display: none;">TUNAI</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input">
+                            <span>Potongan/Diskon:</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-diskon-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-diskon-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input" id="row-cash-tunai">
+                            <span>Bayar (Cash):</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-cash-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-cash-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="nota-total" id="nota-total-bayar">TOTAL: Rp 0</div>
+                        <div class="nota-total" id="nota-kembalian" style="border:none; padding-top:2px;">KEMBALIAN: Rp 0</div>
+                        <div class="nota-total" style="color: #10ac84; font-size: 10px; font-weight: normal; border: none; padding: 0;" id="nota-estimasi-untung"></div>
+                        <div class="nota-footer"><p>Terima Kasih Atas Kunjungan Anda!<br>Toko Berkah, Belanja Lancar Jaya</p></div>
+                    </div>
+
+                    <button class="action-btn btn-blue" onclick="window.print()">🖨️ Cetak Kertas Nota Struk</button>
+                    <button class="action-btn btn-orange" onclick="downloadNota()">📸 Unduh File Gambar Struk</button>
+                    <button class="action-btn btn-success" onclick="simpanTransaksiKeLaporan()">💾 Selesai & Simpan Buku Untung</button>
+                    <button class="action-btn btn-secondary" style="font-size:12px; padding:8px;" onclick="kosongkanKeranjang()">Kosongkan Keranjang</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="folder-input" class="folder-content">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <div class="card" style="background: #ebf8ff; border: 1px dashed var(--primary);">
+                <h4 style="margin:0 0 10px 0; color:var(--primary);">➕ Buat Kategori/Grup Jualan Baru</h4>
+                <div style="display:flex; gap: 8px;">
+                    <input type="text" id="new-category-input" placeholder="Contoh: ATK, Mainan Cowok, Sembako" style="padding:10px; flex:1; border:1px solid #ccc; border-radius:8px;">
+                    <button style="width:auto; padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;" onclick="tambahKategoriBaru()">Simpan Kategori</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3 id="form-title" class="section-title">Formulir Pendaftaran Barang (Multi-Satuan)</h3>
+                <form id="product-form">
+                    <input type="hidden" id="product-index">
+                    
+                    <div class="form-group"><label>Kategori Barang</label><select id="kategori_pilih" required></select></div>
+                    
+                    <div class="form-group">
+                        <label>Kode Barcode Unik</label>
+                        <button type="button" class="btn-kamera" id="btn-toggle-camera-input" onclick="toggleKameraHP('INPUT')" style="margin-bottom:8px; background:linear-gradient(135deg, #20bf6b 0%, #05c46b 100%);">📸 Scan Barcode via Kamera HP</button>
+                        <div id="reader-input"></div>
+                        <input type="text" id="kode" required placeholder="Hasil scan barcode...">
+                    </div>
+
+                    <div class="form-group"><label>Nama Lengkap Produk</label><input type="text" id="nama" required placeholder="Contoh: Pulpen Kenko Gel"></div>
+                    
+                    <div class="form-group"><label>💵 HARGA SATUAN (PCS)</label></div>
+                    <div class="row-grosir-inputs">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pcs</label><input type="number" id="harga_beli" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual Eceran Pcs</label><input type="number" id="harga_satuan" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>📦 HARGA PER PACK / DUS</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #ff9f43;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pak</label><input type="number" id="harga_beli_pack" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Pak</label><input type="number" id="harga_jual_pack" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>🧺 HARGA PER LUSIN (12 Pcs)</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #10ac84;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Lusin</label><input type="number" id="harga_beli_lusin" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Lusin</label><input type="number" id="harga_jual_lusin" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>Harga Grosir Pcs (Jika beli minimal 3 pcs biasa)</label><input type="number" id="harga_grosir" required value="0"></div>
+                    <div class="form-group"><label>Jumlah Sisa Stok Gudang (Hit<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Berkah Bpk Ayi - Modern Marketplace Version</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary: #1e3799;
+            --secondary: #05c46b;
+            --background: #f8f9fa;
+            --text-main: #2f3542;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background); margin: 0; padding: 0; color: var(--text-main);
+        }
+        
+        /* HEADER ALA E-COMMERCE PREMIUM */
+        header {
+            background: linear-gradient(135deg, #0a3d62 0%, #1e3799 100%);
+            color: #fff; padding: 20px 15px; text-align: center;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.5px; }
+        header p { margin: 6px 0 0 0; opacity: 0.85; font-size: 13px; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
+        
+        /* NAVIGASI MENU MODERN (TABS) */
+        .folder-navigation {
+            display: flex; gap: 10px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        .folder-navigation::-webkit-scrollbar { display: none; }
+        .folder-btn {
+            flex: 1; min-width: 140px; padding: 12px 8px; background: #fff; border: 1px solid #e1e8ed; 
+            border-radius: 12px; font-size: 13px; font-weight: 700; color: #747d8c; cursor: pointer; 
+            text-align: center; transition: all 0.3s ease; box-shadow: var(--card-shadow);
+        }
+        .folder-btn.active {
+            background: var(--primary); color: #fff; border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .folder-content { display: none; animation: fadeIn 0.4s ease; }
+        .folder-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* LAYOUT UTAMA MESIN KASIR */
+        .kasir-layout { display: grid; grid-template-columns: 1.3fr 1.14fr; gap: 20px; }
+        @media (max-width: 1200px) { .kasir-layout { grid-template-columns: 1fr; } }
+
+        .section-title { font-size: 18px; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #0a3d62; display: flex; align-items: center; gap: 8px;}
+        .card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--card-shadow); margin-bottom: 20px; box-sizing: border-box;}
+
+        /* SCANNER & KATALOG BARANG */
+        .search-box { 
+            width: 100%; padding: 14px; border: 2px solid #e1e8ed; border-radius: 12px; 
+            box-sizing: border-box; font-size: 14px; transition: all 0.3s; background: #f1f2f6;
+        }
+        .search-box:focus { border-color: var(--primary); background: #fff; outline: none; }
+        
+        .btn-kamera { 
+            background: linear-gradient(135deg, #a55eea 0%, #8854d0 100%); color: white; 
+            border: none; padding: 12px; border-radius: 12px; font-weight: bold; width: 100%; 
+            margin-bottom: 15px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(136, 84, 208, 0.3);
+        }
+        #reader, #reader-input { width: 100%; max-width: 400px; margin: 0 auto 15px auto; border-radius: 12px; overflow: hidden; display: none; border: 3px solid #8854d0;}
+
+        /* ETALASE KATALOG GRID */
+        .filter-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .filter-badge { 
+            padding: 8px 16px; background: #e1e8ed; border-radius: 20px; font-size: 12px; 
+            font-weight: 700; cursor: pointer; white-space: nowrap; color: #2f3542; transition: 0.2s;
+        }
+        .filter-badge.active { background: var(--secondary); color: white; }
+
+        .katalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; max-height: 450px; overflow-y: auto; padding: 5px; }
+        
+        /* KARTU PRODUK */
+        .product-card { 
+            background: #fff; border: 1px solid #f1f2f6; border-radius: 14px; padding: 12px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;
+            position: relative; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .product-card:hover { transform: scale(1.03); box-shadow: 0 6px 15px rgba(0,0,0,0.08); border-color: var(--primary); }
+        .product-card .cat-tag { font-size: 10px; font-weight: 800; color: var(--primary); background: #e8f0fe; padding: 2px 6px; border-radius: 6px; align-self: flex-start; margin-bottom: 6px; }
+        .product-card .p-name { font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; line-height: 1.3; }
+        .product-card .p-price { font-size: 14px; font-weight: 800; color: #ff4757; margin: 0 0 4px 0; }
+        .product-card .p-pack-info { font-size: 11px; color: #20bf6b; font-weight: 600; margin-bottom: 6px;}
+        .product-card .p-stock { font-size: 11px; color: #a4b0be; font-weight: 600; }
+        .product-card .p-stock span { font-weight: 700; }
+        .product-card .add-badge { position: absolute; bottom: 10px; right: 10px; background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+
+        /* DETAIL BELANJAAN TABLE */
+        .cart-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .cart-table th { text-align: left; padding: 10px; background: #f1f2f6; font-weight: 700; color: #57606f; }
+        .cart-table td { padding: 12px 10px; border-bottom: 1px solid #f1f2f6; }
+
+        /* INPUT GRUP BARU UNTUK GROSIR */
+        .row-grosir-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+
+        /* PREVIEW STRUK NOTA KASIR */
+        #nota-container {
+            background: #fff; padding: 15px; border-radius: 8px; border: 1px dashed #2f3542; font-family: 'Courier New', Courier, monospace; color: #000; font-size: 12px;
+        }
+        .nota-header { text-align: center; border-bottom: 1px dashed #333; padding-bottom: 8px; margin-bottom: 8px; }
+        .nota-total { border-top: 1px dashed #333; margin-top: 8px; padding-top: 6px; text-align: right; font-weight: bold; font-size: 13px;}
+        .struk-row-input { margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .struk-input-box { width: 85px; padding: 4px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+
+        /* ACTION BUTTONS */
+        button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        .btn-success { background: linear-gradient(135deg, #10ac84 0%, #05c46b 100%); color: white; box-shadow: 0 4px 10px rgba(5, 196, 107, 0.3); }
+        .btn-blue { background: linear-gradient(135deg, #2980b9 0%, #1e3799 100%); color: white; box-shadow: 0 4px 10px rgba(30, 55, 153, 0.3); }
+        .btn-orange { background: linear-gradient(135deg, #ff9f43 0%, #ee5253 100%); color: white; box-shadow: 0 4px 10px rgba(238, 82, 83, 0.3); }
+        .btn-secondary { background: #747d8c; color: white; }
+
+        /* REKAP MODAL */
+        .laporan-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .summary-box { background: #f1f2f6; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 800; border-left: 5px solid var(--primary); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+
+        .no-print { display: inline-block; }
+        @media print {
+            body * { visibility: hidden; }
+            #nota-container, #nota-container * { visibility: visible; }
+            #nota-container { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🛒 Toko Ayi Toys & ATK</h1>
+    <p>Aplikasi Kasir Pintar - Fitur Penjualan Multi-Satuan (Pcs, Pak & Lusin)</p>
+</header>
+
+<div class="container">
+    <div class="folder-navigation">
+        <button class="folder-btn active" onclick="bukaFolder(event, 'folder-kasir')">🛍️ ETALASE KASIR</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-input')">➕ DAFTAR BARANG BARU</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-stok')">📦 STOK GUDANG TOKO</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-laporan')">📈 LAPORAN UNTUNG</button>
+    </div>
+
+    <div id="folder-kasir" class="folder-content active">
+        <div class="kasir-layout">
+            
+            <div>
+                <div class="card">
+                    <h3 class="section-title">🔍 Scanner & Pencarian Cepat</h3>
+                    <button class="btn-kamera" id="btn-toggle-camera" onclick="toggleKameraHP('KASIR')">📸 Nyalakan Kamera Scan HP</button>
+                    <div id="reader"></div>
+                    <input type="text" id="scanner-input" class="search-box" placeholder="Ketik nama produk atau scan barcode di sini..." onkeypress="handleBarcodeScan(event)" oninput="filterKatalog()">
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🏪 Etalase Produk Toko</h3>
+                    <div class="filter-scroll" id="katalog-filter-badges"></div>
+                    <div class="katalog-grid" id="katalog-produk-area"></div>
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🛒 Keranjang Belanja Konsumen</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="cart-table">
+                            <thead>
+                                <tr><th>Produk</th><th style="text-align:center; width:100px;">Satuan</th><th style="text-align:center; width:60px;">Qty</th><th style="text-align:right;">Subtotal</th><th style="width:10px;"></th></tr>
+                            </thead>
+                            <tbody id="keranjang-list-kasir"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3 class="section-title">📄 Lembar Struk Pembayaran</h3>
+                    <div id="nota-container">
+                        <div class="nota-header">
+                            <h3 style="margin:0; font-size:14px;">TOKO AYI TOYS & ATK</h3>
+                            <p style="margin:2px 0;">Kelontongan, Mainan & Alat Kantor<br>Cicalengka, Jawa Barat</p>
+                            <p style="text-align: left; font-size: 10px; margin-top: 10px;" id="nota-waktu"></p>
+                        </div>
+                        <table style="width: 100%; font-family: monospace; font-size:11px;">
+                            <thead>
+                                <tr style="border-bottom: 1px dashed #333;">
+                                    <th style="padding: 2px 0; text-align: left; background:none; color:#000;">Item</th>
+                                    <th style="padding: 2px 0; text-align: center; background:none; color:#000;">Qty</th>
+                                    <th style="padding: 2px 0; text-align: right; background:none; color:#000;">Total</th>
+                                    <th class="no-print" style="background:none; width: 2px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="nota-items"></tbody>
+                        </table>
+                        
+                        <div class="struk-row-input" style="margin-top:10px;">
+                            <span>Metode:</span>
+                            <div>
+                                <select id="nota-metode-bayar" class="no-print" style="width:90px; padding:2px;" onchange="toggleMetodeBayar()">
+                                    <option value="TUNAI">TUNAI</option><option value="QRIS">QRIS</option><option value="TRANSFER">TRANSFER</option>
+                                </select>
+                                <span id="nota-metode-Cetak" style="display: none;">TUNAI</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input">
+                            <span>Potongan/Diskon:</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-diskon-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-diskon-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input" id="row-cash-tunai">
+                            <span>Bayar (Cash):</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-cash-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-cash-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="nota-total" id="nota-total-bayar">TOTAL: Rp 0</div>
+                        <div class="nota-total" id="nota-kembalian" style="border:none; padding-top:2px;">KEMBALIAN: Rp 0</div>
+                        <div class="nota-total" style="color: #10ac84; font-size: 10px; font-weight: normal; border: none; padding: 0;" id="nota-estimasi-untung"></div>
+                        <div class="nota-footer"><p>Terima Kasih Atas Kunjungan Anda!<br>Toko Berkah, Belanja Lancar Jaya</p></div>
+                    </div>
+
+                    <button class="action-btn btn-blue" onclick="window.print()">🖨️ Cetak Kertas Nota Struk</button>
+                    <button class="action-btn btn-orange" onclick="downloadNota()">📸 Unduh File Gambar Struk</button>
+                    <button class="action-btn btn-success" onclick="simpanTransaksiKeLaporan()">💾 Selesai & Simpan Buku Untung</button>
+                    <button class="action-btn btn-secondary" style="font-size:12px; padding:8px;" onclick="kosongkanKeranjang()">Kosongkan Keranjang</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="folder-input" class="folder-content">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <div class="card" style="background: #ebf8ff; border: 1px dashed var(--primary);">
+                <h4 style="margin:0 0 10px 0; color:var(--primary);">➕ Buat Kategori/Grup Jualan Baru</h4>
+                <div style="display:flex; gap: 8px;">
+                    <input type="text" id="new-category-input" placeholder="Contoh: ATK, Mainan Cowok, Sembako" style="padding:10px; flex:1; border:1px solid #ccc; border-radius:8px;">
+                    <button style="width:auto; padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;" onclick="tambahKategoriBaru()">Simpan Kategori</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3 id="form-title" class="section-title">Formulir Pendaftaran Barang (Multi-Satuan)</h3>
+                <form id="product-form">
+                    <input type="hidden" id="product-index">
+                    
+                    <div class="form-group"><label>Kategori Barang</label><select id="kategori_pilih" required></select></div>
+                    
+                    <div class="form-group">
+                        <label>Kode Barcode Unik</label>
+                        <button type="button" class="btn-kamera" id="btn-toggle-camera-input" onclick="toggleKameraHP('INPUT')" style="margin-bottom:8px; background:linear-gradient(135deg, #20bf6b 0%, #05c46b 100%);">📸 Scan Barcode via Kamera HP</button>
+                        <div id="reader-input"></div>
+                        <input type="text" id="kode" required placeholder="Hasil scan barcode...">
+                    </div>
+
+                    <div class="form-group"><label>Nama Lengkap Produk</label><input type="text" id="nama" required placeholder="Contoh: Pulpen Kenko Gel"></div>
+                    
+                    <div class="form-group"><label>💵 HARGA SATUAN (PCS)</label></div>
+                    <div class="row-grosir-inputs">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pcs</label><input type="number" id="harga_beli" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual Eceran Pcs</label><input type="number" id="harga_satuan" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>📦 HARGA PER PACK / DUS</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #ff9f43;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pak</label><input type="number" id="harga_beli_pack" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Pak</label><input type="number" id="harga_jual_pack" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>🧺 HARGA PER LUSIN (12 Pcs)</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #10ac84;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Lusin</label><input type="number" id="harga_beli_lusin" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Lusin</label><input type="number" id="harga_jual_lusin" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>Harga Grosir Pcs (Jika beli minimal 3 pcs biasa)</label><input type="number" id="harga_grosir" required value="0"></div>
+                    <div class="form-group"><label>Jumlah Sisa Stok Gudang (Hit<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Berkah Bpk Ayi - Modern Marketplace Version</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary: #1e3799;
+            --secondary: #05c46b;
+            --background: #f8f9fa;
+            --text-main: #2f3542;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background); margin: 0; padding: 0; color: var(--text-main);
+        }
+        
+        /* HEADER ALA E-COMMERCE PREMIUM */
+        header {
+            background: linear-gradient(135deg, #0a3d62 0%, #1e3799 100%);
+            color: #fff; padding: 20px 15px; text-align: center;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.5px; }
+        header p { margin: 6px 0 0 0; opacity: 0.85; font-size: 13px; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
+        
+        /* NAVIGASI MENU MODERN (TABS) */
+        .folder-navigation {
+            display: flex; gap: 10px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        .folder-navigation::-webkit-scrollbar { display: none; }
+        .folder-btn {
+            flex: 1; min-width: 140px; padding: 12px 8px; background: #fff; border: 1px solid #e1e8ed; 
+            border-radius: 12px; font-size: 13px; font-weight: 700; color: #747d8c; cursor: pointer; 
+            text-align: center; transition: all 0.3s ease; box-shadow: var(--card-shadow);
+        }
+        .folder-btn.active {
+            background: var(--primary); color: #fff; border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .folder-content { display: none; animation: fadeIn 0.4s ease; }
+        .folder-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* LAYOUT UTAMA MESIN KASIR */
+        .kasir-layout { display: grid; grid-template-columns: 1.3fr 1.14fr; gap: 20px; }
+        @media (max-width: 1200px) { .kasir-layout { grid-template-columns: 1fr; } }
+
+        .section-title { font-size: 18px; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #0a3d62; display: flex; align-items: center; gap: 8px;}
+        .card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--card-shadow); margin-bottom: 20px; box-sizing: border-box;}
+
+        /* SCANNER & KATALOG BARANG */
+        .search-box { 
+            width: 100%; padding: 14px; border: 2px solid #e1e8ed; border-radius: 12px; 
+            box-sizing: border-box; font-size: 14px; transition: all 0.3s; background: #f1f2f6;
+        }
+        .search-box:focus { border-color: var(--primary); background: #fff; outline: none; }
+        
+        .btn-kamera { 
+            background: linear-gradient(135deg, #a55eea 0%, #8854d0 100%); color: white; 
+            border: none; padding: 12px; border-radius: 12px; font-weight: bold; width: 100%; 
+            margin-bottom: 15px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(136, 84, 208, 0.3);
+        }
+        #reader, #reader-input { width: 100%; max-width: 400px; margin: 0 auto 15px auto; border-radius: 12px; overflow: hidden; display: none; border: 3px solid #8854d0;}
+
+        /* ETALASE KATALOG GRID */
+        .filter-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .filter-badge { 
+            padding: 8px 16px; background: #e1e8ed; border-radius: 20px; font-size: 12px; 
+            font-weight: 700; cursor: pointer; white-space: nowrap; color: #2f3542; transition: 0.2s;
+        }
+        .filter-badge.active { background: var(--secondary); color: white; }
+
+        .katalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; max-height: 450px; overflow-y: auto; padding: 5px; }
+        
+        /* KARTU PRODUK */
+        .product-card { 
+            background: #fff; border: 1px solid #f1f2f6; border-radius: 14px; padding: 12px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;
+            position: relative; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .product-card:hover { transform: scale(1.03); box-shadow: 0 6px 15px rgba(0,0,0,0.08); border-color: var(--primary); }
+        .product-card .cat-tag { font-size: 10px; font-weight: 800; color: var(--primary); background: #e8f0fe; padding: 2px 6px; border-radius: 6px; align-self: flex-start; margin-bottom: 6px; }
+        .product-card .p-name { font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; line-height: 1.3; }
+        .product-card .p-price { font-size: 14px; font-weight: 800; color: #ff4757; margin: 0 0 4px 0; }
+        .product-card .p-pack-info { font-size: 11px; color: #20bf6b; font-weight: 600; margin-bottom: 6px;}
+        .product-card .p-stock { font-size: 11px; color: #a4b0be; font-weight: 600; }
+        .product-card .p-stock span { font-weight: 700; }
+        .product-card .add-badge { position: absolute; bottom: 10px; right: 10px; background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+
+        /* DETAIL BELANJAAN TABLE */
+        .cart-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .cart-table th { text-align: left; padding: 10px; background: #f1f2f6; font-weight: 700; color: #57606f; }
+        .cart-table td { padding: 12px 10px; border-bottom: 1px solid #f1f2f6; }
+
+        /* INPUT GRUP BARU UNTUK GROSIR */
+        .row-grosir-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+
+        /* PREVIEW STRUK NOTA KASIR */
+        #nota-container {
+            background: #fff; padding: 15px; border-radius: 8px; border: 1px dashed #2f3542; font-family: 'Courier New', Courier, monospace; color: #000; font-size: 12px;
+        }
+        .nota-header { text-align: center; border-bottom: 1px dashed #333; padding-bottom: 8px; margin-bottom: 8px; }
+        .nota-total { border-top: 1px dashed #333; margin-top: 8px; padding-top: 6px; text-align: right; font-weight: bold; font-size: 13px;}
+        .struk-row-input { margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .struk-input-box { width: 85px; padding: 4px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+
+        /* ACTION BUTTONS */
+        button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        .btn-success { background: linear-gradient(135deg, #10ac84 0%, #05c46b 100%); color: white; box-shadow: 0 4px 10px rgba(5, 196, 107, 0.3); }
+        .btn-blue { background: linear-gradient(135deg, #2980b9 0%, #1e3799 100%); color: white; box-shadow: 0 4px 10px rgba(30, 55, 153, 0.3); }
+        .btn-orange { background: linear-gradient(135deg, #ff9f43 0%, #ee5253 100%); color: white; box-shadow: 0 4px 10px rgba(238, 82, 83, 0.3); }
+        .btn-secondary { background: #747d8c; color: white; }
+
+        /* REKAP MODAL */
+        .laporan-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .summary-box { background: #f1f2f6; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 800; border-left: 5px solid var(--primary); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+
+        .no-print { display: inline-block; }
+        @media print {
+            body * { visibility: hidden; }
+            #nota-container, #nota-container * { visibility: visible; }
+            #nota-container { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🛒 Toko Ayi Toys & ATK</h1>
+    <p>Aplikasi Kasir Pintar - Fitur Penjualan Multi-Satuan (Pcs, Pak & Lusin)</p>
+</header>
+
+<div class="container">
+    <div class="folder-navigation">
+        <button class="folder-btn active" onclick="bukaFolder(event, 'folder-kasir')">🛍️ ETALASE KASIR</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-input')">➕ DAFTAR BARANG BARU</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-stok')">📦 STOK GUDANG TOKO</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-laporan')">📈 LAPORAN UNTUNG</button>
+    </div>
+
+    <div id="folder-kasir" class="folder-content active">
+        <div class="kasir-layout">
+            
+            <div>
+                <div class="card">
+                    <h3 class="section-title">🔍 Scanner & Pencarian Cepat</h3>
+                    <button class="btn-kamera" id="btn-toggle-camera" onclick="toggleKameraHP('KASIR')">📸 Nyalakan Kamera Scan HP</button>
+                    <div id="reader"></div>
+                    <input type="text" id="scanner-input" class="search-box" placeholder="Ketik nama produk atau scan barcode di sini..." onkeypress="handleBarcodeScan(event)" oninput="filterKatalog()">
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🏪 Etalase Produk Toko</h3>
+                    <div class="filter-scroll" id="katalog-filter-badges"></div>
+                    <div class="katalog-grid" id="katalog-produk-area"></div>
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🛒 Keranjang Belanja Konsumen</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="cart-table">
+                            <thead>
+                                <tr><th>Produk</th><th style="text-align:center; width:100px;">Satuan</th><th style="text-align:center; width:60px;">Qty</th><th style="text-align:right;">Subtotal</th><th style="width:10px;"></th></tr>
+                            </thead>
+                            <tbody id="keranjang-list-kasir"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3 class="section-title">📄 Lembar Struk Pembayaran</h3>
+                    <div id="nota-container">
+                        <div class="nota-header">
+                            <h3 style="margin:0; font-size:14px;">TOKO AYI TOYS & ATK</h3>
+                            <p style="margin:2px 0;">Kelontongan, Mainan & Alat Kantor<br>Cicalengka, Jawa Barat</p>
+                            <p style="text-align: left; font-size: 10px; margin-top: 10px;" id="nota-waktu"></p>
+                        </div>
+                        <table style="width: 100%; font-family: monospace; font-size:11px;">
+                            <thead>
+                                <tr style="border-bottom: 1px dashed #333;">
+                                    <th style="padding: 2px 0; text-align: left; background:none; color:#000;">Item</th>
+                                    <th style="padding: 2px 0; text-align: center; background:none; color:#000;">Qty</th>
+                                    <th style="padding: 2px 0; text-align: right; background:none; color:#000;">Total</th>
+                                    <th class="no-print" style="background:none; width: 2px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="nota-items"></tbody>
+                        </table>
+                        
+                        <div class="struk-row-input" style="margin-top:10px;">
+                            <span>Metode:</span>
+                            <div>
+                                <select id="nota-metode-bayar" class="no-print" style="width:90px; padding:2px;" onchange="toggleMetodeBayar()">
+                                    <option value="TUNAI">TUNAI</option><option value="QRIS">QRIS</option><option value="TRANSFER">TRANSFER</option>
+                                </select>
+                                <span id="nota-metode-Cetak" style="display: none;">TUNAI</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input">
+                            <span>Potongan/Diskon:</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-diskon-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-diskon-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input" id="row-cash-tunai">
+                            <span>Bayar (Cash):</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-cash-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-cash-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="nota-total" id="nota-total-bayar">TOTAL: Rp 0</div>
+                        <div class="nota-total" id="nota-kembalian" style="border:none; padding-top:2px;">KEMBALIAN: Rp 0</div>
+                        <div class="nota-total" style="color: #10ac84; font-size: 10px; font-weight: normal; border: none; padding: 0;" id="nota-estimasi-untung"></div>
+                        <div class="nota-footer"><p>Terima Kasih Atas Kunjungan Anda!<br>Toko Berkah, Belanja Lancar Jaya</p></div>
+                    </div>
+
+                    <button class="action-btn btn-blue" onclick="window.print()">🖨️ Cetak Kertas Nota Struk</button>
+                    <button class="action-btn btn-orange" onclick="downloadNota()">📸 Unduh File Gambar Struk</button>
+                    <button class="action-btn btn-success" onclick="simpanTransaksiKeLaporan()">💾 Selesai & Simpan Buku Untung</button>
+                    <button class="action-btn btn-secondary" style="font-size:12px; padding:8px;" onclick="kosongkanKeranjang()">Kosongkan Keranjang</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="folder-input" class="folder-content">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <div class="card" style="background: #ebf8ff; border: 1px dashed var(--primary);">
+                <h4 style="margin:0 0 10px 0; color:var(--primary);">➕ Buat Kategori/Grup Jualan Baru</h4>
+                <div style="display:flex; gap: 8px;">
+                    <input type="text" id="new-category-input" placeholder="Contoh: ATK, Mainan Cowok, Sembako" style="padding:10px; flex:1; border:1px solid #ccc; border-radius:8px;">
+                    <button style="width:auto; padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;" onclick="tambahKategoriBaru()">Simpan Kategori</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3 id="form-title" class="section-title">Formulir Pendaftaran Barang (Multi-Satuan)</h3>
+                <form id="product-form">
+                    <input type="hidden" id="product-index">
+                    
+                    <div class="form-group"><label>Kategori Barang</label><select id="kategori_pilih" required></select></div>
+                    
+                    <div class="form-group">
+                        <label>Kode Barcode Unik</label>
+                        <button type="button" class="btn-kamera" id="btn-toggle-camera-input" onclick="toggleKameraHP('INPUT')" style="margin-bottom:8px; background:linear-gradient(135deg, #20bf6b 0%, #05c46b 100%);">📸 Scan Barcode via Kamera HP</button>
+                        <div id="reader-input"></div>
+                        <input type="text" id="kode" required placeholder="Hasil scan barcode...">
+                    </div>
+
+                    <div class="form-group"><label>Nama Lengkap Produk</label><input type="text" id="nama" required placeholder="Contoh: Pulpen Kenko Gel"></div>
+                    
+                    <div class="form-group"><label>💵 HARGA SATUAN (PCS)</label></div>
+                    <div class="row-grosir-inputs">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pcs</label><input type="number" id="harga_beli" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual Eceran Pcs</label><input type="number" id="harga_satuan" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>📦 HARGA PER PACK / DUS</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #ff9f43;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pak</label><input type="number" id="harga_beli_pack" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Pak</label><input type="number" id="harga_jual_pack" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>🧺 HARGA PER LUSIN (12 Pcs)</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #10ac84;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Lusin</label><input type="number" id="harga_beli_lusin" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Lusin</label><input type="number" id="harga_jual_lusin" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>Harga Grosir Pcs (Jika beli minimal 3 pcs biasa)</label><input type="number" id="harga_grosir" required value="0"></div>
+                    <div class="form-group"><label>Jumlah Sisa Stok Gudang (Hit<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Berkah Bpk Ayi - Modern Marketplace Version</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary: #1e3799;
+            --secondary: #05c46b;
+            --background: #f8f9fa;
+            --text-main: #2f3542;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background); margin: 0; padding: 0; color: var(--text-main);
+        }
+        
+        /* HEADER ALA E-COMMERCE PREMIUM */
+        header {
+            background: linear-gradient(135deg, #0a3d62 0%, #1e3799 100%);
+            color: #fff; padding: 20px 15px; text-align: center;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.5px; }
+        header p { margin: 6px 0 0 0; opacity: 0.85; font-size: 13px; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
+        
+        /* NAVIGASI MENU MODERN (TABS) */
+        .folder-navigation {
+            display: flex; gap: 10px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        .folder-navigation::-webkit-scrollbar { display: none; }
+        .folder-btn {
+            flex: 1; min-width: 140px; padding: 12px 8px; background: #fff; border: 1px solid #e1e8ed; 
+            border-radius: 12px; font-size: 13px; font-weight: 700; color: #747d8c; cursor: pointer; 
+            text-align: center; transition: all 0.3s ease; box-shadow: var(--card-shadow);
+        }
+        .folder-btn.active {
+            background: var(--primary); color: #fff; border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .folder-content { display: none; animation: fadeIn 0.4s ease; }
+        .folder-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* LAYOUT UTAMA MESIN KASIR */
+        .kasir-layout { display: grid; grid-template-columns: 1.3fr 1.14fr; gap: 20px; }
+        @media (max-width: 1200px) { .kasir-layout { grid-template-columns: 1fr; } }
+
+        .section-title { font-size: 18px; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #0a3d62; display: flex; align-items: center; gap: 8px;}
+        .card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--card-shadow); margin-bottom: 20px; box-sizing: border-box;}
+
+        /* SCANNER & KATALOG BARANG */
+        .search-box { 
+            width: 100%; padding: 14px; border: 2px solid #e1e8ed; border-radius: 12px; 
+            box-sizing: border-box; font-size: 14px; transition: all 0.3s; background: #f1f2f6;
+        }
+        .search-box:focus { border-color: var(--primary); background: #fff; outline: none; }
+        
+        .btn-kamera { 
+            background: linear-gradient(135deg, #a55eea 0%, #8854d0 100%); color: white; 
+            border: none; padding: 12px; border-radius: 12px; font-weight: bold; width: 100%; 
+            margin-bottom: 15px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(136, 84, 208, 0.3);
+        }
+        #reader, #reader-input { width: 100%; max-width: 400px; margin: 0 auto 15px auto; border-radius: 12px; overflow: hidden; display: none; border: 3px solid #8854d0;}
+
+        /* ETALASE KATALOG GRID */
+        .filter-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .filter-badge { 
+            padding: 8px 16px; background: #e1e8ed; border-radius: 20px; font-size: 12px; 
+            font-weight: 700; cursor: pointer; white-space: nowrap; color: #2f3542; transition: 0.2s;
+        }
+        .filter-badge.active { background: var(--secondary); color: white; }
+
+        .katalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; max-height: 450px; overflow-y: auto; padding: 5px; }
+        
+        /* KARTU PRODUK */
+        .product-card { 
+            background: #fff; border: 1px solid #f1f2f6; border-radius: 14px; padding: 12px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;
+            position: relative; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .product-card:hover { transform: scale(1.03); box-shadow: 0 6px 15px rgba(0,0,0,0.08); border-color: var(--primary); }
+        .product-card .cat-tag { font-size: 10px; font-weight: 800; color: var(--primary); background: #e8f0fe; padding: 2px 6px; border-radius: 6px; align-self: flex-start; margin-bottom: 6px; }
+        .product-card .p-name { font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; line-height: 1.3; }
+        .product-card .p-price { font-size: 14px; font-weight: 800; color: #ff4757; margin: 0 0 4px 0; }
+        .product-card .p-pack-info { font-size: 11px; color: #20bf6b; font-weight: 600; margin-bottom: 6px;}
+        .product-card .p-stock { font-size: 11px; color: #a4b0be; font-weight: 600; }
+        .product-card .p-stock span { font-weight: 700; }
+        .product-card .add-badge { position: absolute; bottom: 10px; right: 10px; background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+
+        /* DETAIL BELANJAAN TABLE */
+        .cart-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .cart-table th { text-align: left; padding: 10px; background: #f1f2f6; font-weight: 700; color: #57606f; }
+        .cart-table td { padding: 12px 10px; border-bottom: 1px solid #f1f2f6; }
+
+        /* INPUT GRUP BARU UNTUK GROSIR */
+        .row-grosir-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+
+        /* PREVIEW STRUK NOTA KASIR */
+        #nota-container {
+            background: #fff; padding: 15px; border-radius: 8px; border: 1px dashed #2f3542; font-family: 'Courier New', Courier, monospace; color: #000; font-size: 12px;
+        }
+        .nota-header { text-align: center; border-bottom: 1px dashed #333; padding-bottom: 8px; margin-bottom: 8px; }
+        .nota-total { border-top: 1px dashed #333; margin-top: 8px; padding-top: 6px; text-align: right; font-weight: bold; font-size: 13px;}
+        .struk-row-input { margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .struk-input-box { width: 85px; padding: 4px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+
+        /* ACTION BUTTONS */
+        button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        .btn-success { background: linear-gradient(135deg, #10ac84 0%, #05c46b 100%); color: white; box-shadow: 0 4px 10px rgba(5, 196, 107, 0.3); }
+        .btn-blue { background: linear-gradient(135deg, #2980b9 0%, #1e3799 100%); color: white; box-shadow: 0 4px 10px rgba(30, 55, 153, 0.3); }
+        .btn-orange { background: linear-gradient(135deg, #ff9f43 0%, #ee5253 100%); color: white; box-shadow: 0 4px 10px rgba(238, 82, 83, 0.3); }
+        .btn-secondary { background: #747d8c; color: white; }
+
+        /* REKAP MODAL */
+        .laporan-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .summary-box { background: #f1f2f6; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 800; border-left: 5px solid var(--primary); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+
+        .no-print { display: inline-block; }
+        @media print {
+            body * { visibility: hidden; }
+            #nota-container, #nota-container * { visibility: visible; }
+            #nota-container { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🛒 Toko Ayi Toys & ATK</h1>
+    <p>Aplikasi Kasir Pintar - Fitur Penjualan Multi-Satuan (Pcs, Pak & Lusin)</p>
+</header>
+
+<div class="container">
+    <div class="folder-navigation">
+        <button class="folder-btn active" onclick="bukaFolder(event, 'folder-kasir')">🛍️ ETALASE KASIR</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-input')">➕ DAFTAR BARANG BARU</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-stok')">📦 STOK GUDANG TOKO</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-laporan')">📈 LAPORAN UNTUNG</button>
+    </div>
+
+    <div id="folder-kasir" class="folder-content active">
+        <div class="kasir-layout">
+            
+            <div>
+                <div class="card">
+                    <h3 class="section-title">🔍 Scanner & Pencarian Cepat</h3>
+                    <button class="btn-kamera" id="btn-toggle-camera" onclick="toggleKameraHP('KASIR')">📸 Nyalakan Kamera Scan HP</button>
+                    <div id="reader"></div>
+                    <input type="text" id="scanner-input" class="search-box" placeholder="Ketik nama produk atau scan barcode di sini..." onkeypress="handleBarcodeScan(event)" oninput="filterKatalog()">
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🏪 Etalase Produk Toko</h3>
+                    <div class="filter-scroll" id="katalog-filter-badges"></div>
+                    <div class="katalog-grid" id="katalog-produk-area"></div>
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🛒 Keranjang Belanja Konsumen</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="cart-table">
+                            <thead>
+                                <tr><th>Produk</th><th style="text-align:center; width:100px;">Satuan</th><th style="text-align:center; width:60px;">Qty</th><th style="text-align:right;">Subtotal</th><th style="width:10px;"></th></tr>
+                            </thead>
+                            <tbody id="keranjang-list-kasir"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3 class="section-title">📄 Lembar Struk Pembayaran</h3>
+                    <div id="nota-container">
+                        <div class="nota-header">
+                            <h3 style="margin:0; font-size:14px;">TOKO AYI TOYS & ATK</h3>
+                            <p style="margin:2px 0;">Kelontongan, Mainan & Alat Kantor<br>Cicalengka, Jawa Barat</p>
+                            <p style="text-align: left; font-size: 10px; margin-top: 10px;" id="nota-waktu"></p>
+                        </div>
+                        <table style="width: 100%; font-family: monospace; font-size:11px;">
+                            <thead>
+                                <tr style="border-bottom: 1px dashed #333;">
+                                    <th style="padding: 2px 0; text-align: left; background:none; color:#000;">Item</th>
+                                    <th style="padding: 2px 0; text-align: center; background:none; color:#000;">Qty</th>
+                                    <th style="padding: 2px 0; text-align: right; background:none; color:#000;">Total</th>
+                                    <th class="no-print" style="background:none; width: 2px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="nota-items"></tbody>
+                        </table>
+                        
+                        <div class="struk-row-input" style="margin-top:10px;">
+                            <span>Metode:</span>
+                            <div>
+                                <select id="nota-metode-bayar" class="no-print" style="width:90px; padding:2px;" onchange="toggleMetodeBayar()">
+                                    <option value="TUNAI">TUNAI</option><option value="QRIS">QRIS</option><option value="TRANSFER">TRANSFER</option>
+                                </select>
+                                <span id="nota-metode-Cetak" style="display: none;">TUNAI</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input">
+                            <span>Potongan/Diskon:</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-diskon-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-diskon-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input" id="row-cash-tunai">
+                            <span>Bayar (Cash):</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-cash-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-cash-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="nota-total" id="nota-total-bayar">TOTAL: Rp 0</div>
+                        <div class="nota-total" id="nota-kembalian" style="border:none; padding-top:2px;">KEMBALIAN: Rp 0</div>
+                        <div class="nota-total" style="color: #10ac84; font-size: 10px; font-weight: normal; border: none; padding: 0;" id="nota-estimasi-untung"></div>
+                        <div class="nota-footer"><p>Terima Kasih Atas Kunjungan Anda!<br>Toko Berkah, Belanja Lancar Jaya</p></div>
+                    </div>
+
+                    <button class="action-btn btn-blue" onclick="window.print()">🖨️ Cetak Kertas Nota Struk</button>
+                    <button class="action-btn btn-orange" onclick="downloadNota()">📸 Unduh File Gambar Struk</button>
+                    <button class="action-btn btn-success" onclick="simpanTransaksiKeLaporan()">💾 Selesai & Simpan Buku Untung</button>
+                    <button class="action-btn btn-secondary" style="font-size:12px; padding:8px;" onclick="kosongkanKeranjang()">Kosongkan Keranjang</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="folder-input" class="folder-content">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <div class="card" style="background: #ebf8ff; border: 1px dashed var(--primary);">
+                <h4 style="margin:0 0 10px 0; color:var(--primary);">➕ Buat Kategori/Grup Jualan Baru</h4>
+                <div style="display:flex; gap: 8px;">
+                    <input type="text" id="new-category-input" placeholder="Contoh: ATK, Mainan Cowok, Sembako" style="padding:10px; flex:1; border:1px solid #ccc; border-radius:8px;">
+                    <button style="width:auto; padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;" onclick="tambahKategoriBaru()">Simpan Kategori</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3 id="form-title" class="section-title">Formulir Pendaftaran Barang (Multi-Satuan)</h3>
+                <form id="product-form">
+                    <input type="hidden" id="product-index">
+                    
+                    <div class="form-group"><label>Kategori Barang</label><select id="kategori_pilih" required></select></div>
+                    
+                    <div class="form-group">
+                        <label>Kode Barcode Unik</label>
+                        <button type="button" class="btn-kamera" id="btn-toggle-camera-input" onclick="toggleKameraHP('INPUT')" style="margin-bottom:8px; background:linear-gradient(135deg, #20bf6b 0%, #05c46b 100%);">📸 Scan Barcode via Kamera HP</button>
+                        <div id="reader-input"></div>
+                        <input type="text" id="kode" required placeholder="Hasil scan barcode...">
+                    </div>
+
+                    <div class="form-group"><label>Nama Lengkap Produk</label><input type="text" id="nama" required placeholder="Contoh: Pulpen Kenko Gel"></div>
+                    
+                    <div class="form-group"><label>💵 HARGA SATUAN (PCS)</label></div>
+                    <div class="row-grosir-inputs">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pcs</label><input type="number" id="harga_beli" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual Eceran Pcs</label><input type="number" id="harga_satuan" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>📦 HARGA PER PACK / DUS</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #ff9f43;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pak</label><input type="number" id="harga_beli_pack" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Pak</label><input type="number" id="harga_jual_pack" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>🧺 HARGA PER LUSIN (12 Pcs)</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #10ac84;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Lusin</label><input type="number" id="harga_beli_lusin" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Lusin</label><input type="number" id="harga_jual_lusin" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>Harga Grosir Pcs (Jika beli minimal 3 pcs biasa)</label><input type="number" id="harga_grosir" required value="0"></div>
+                    <div class="form-group"><label>Jumlah Sisa Stok Gudang (Hit<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Berkah Bpk Ayi - Modern Marketplace Version</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary: #1e3799;
+            --secondary: #05c46b;
+            --background: #f8f9fa;
+            --text-main: #2f3542;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background); margin: 0; padding: 0; color: var(--text-main);
+        }
+        
+        /* HEADER ALA E-COMMERCE PREMIUM */
+        header {
+            background: linear-gradient(135deg, #0a3d62 0%, #1e3799 100%);
+            color: #fff; padding: 20px 15px; text-align: center;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.5px; }
+        header p { margin: 6px 0 0 0; opacity: 0.85; font-size: 13px; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
+        
+        /* NAVIGASI MENU MODERN (TABS) */
+        .folder-navigation {
+            display: flex; gap: 10px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        .folder-navigation::-webkit-scrollbar { display: none; }
+        .folder-btn {
+            flex: 1; min-width: 140px; padding: 12px 8px; background: #fff; border: 1px solid #e1e8ed; 
+            border-radius: 12px; font-size: 13px; font-weight: 700; color: #747d8c; cursor: pointer; 
+            text-align: center; transition: all 0.3s ease; box-shadow: var(--card-shadow);
+        }
+        .folder-btn.active {
+            background: var(--primary); color: #fff; border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .folder-content { display: none; animation: fadeIn 0.4s ease; }
+        .folder-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* LAYOUT UTAMA MESIN KASIR */
+        .kasir-layout { display: grid; grid-template-columns: 1.3fr 1.14fr; gap: 20px; }
+        @media (max-width: 1200px) { .kasir-layout { grid-template-columns: 1fr; } }
+
+        .section-title { font-size: 18px; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #0a3d62; display: flex; align-items: center; gap: 8px;}
+        .card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: var(--card-shadow); margin-bottom: 20px; box-sizing: border-box;}
+
+        /* SCANNER & KATALOG BARANG */
+        .search-box { 
+            width: 100%; padding: 14px; border: 2px solid #e1e8ed; border-radius: 12px; 
+            box-sizing: border-box; font-size: 14px; transition: all 0.3s; background: #f1f2f6;
+        }
+        .search-box:focus { border-color: var(--primary); background: #fff; outline: none; }
+        
+        .btn-kamera { 
+            background: linear-gradient(135deg, #a55eea 0%, #8854d0 100%); color: white; 
+            border: none; padding: 12px; border-radius: 12px; font-weight: bold; width: 100%; 
+            margin-bottom: 15px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(136, 84, 208, 0.3);
+        }
+        #reader, #reader-input { width: 100%; max-width: 400px; margin: 0 auto 15px auto; border-radius: 12px; overflow: hidden; display: none; border: 3px solid #8854d0;}
+
+        /* ETALASE KATALOG GRID */
+        .filter-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .filter-badge { 
+            padding: 8px 16px; background: #e1e8ed; border-radius: 20px; font-size: 12px; 
+            font-weight: 700; cursor: pointer; white-space: nowrap; color: #2f3542; transition: 0.2s;
+        }
+        .filter-badge.active { background: var(--secondary); color: white; }
+
+        .katalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; max-height: 450px; overflow-y: auto; padding: 5px; }
+        
+        /* KARTU PRODUK */
+        .product-card { 
+            background: #fff; border: 1px solid #f1f2f6; border-radius: 14px; padding: 12px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;
+            position: relative; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .product-card:hover { transform: scale(1.03); box-shadow: 0 6px 15px rgba(0,0,0,0.08); border-color: var(--primary); }
+        .product-card .cat-tag { font-size: 10px; font-weight: 800; color: var(--primary); background: #e8f0fe; padding: 2px 6px; border-radius: 6px; align-self: flex-start; margin-bottom: 6px; }
+        .product-card .p-name { font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; line-height: 1.3; }
+        .product-card .p-price { font-size: 14px; font-weight: 800; color: #ff4757; margin: 0 0 4px 0; }
+        .product-card .p-pack-info { font-size: 11px; color: #20bf6b; font-weight: 600; margin-bottom: 6px;}
+        .product-card .p-stock { font-size: 11px; color: #a4b0be; font-weight: 600; }
+        .product-card .p-stock span { font-weight: 700; }
+        .product-card .add-badge { position: absolute; bottom: 10px; right: 10px; background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+
+        /* DETAIL BELANJAAN TABLE */
+        .cart-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .cart-table th { text-align: left; padding: 10px; background: #f1f2f6; font-weight: 700; color: #57606f; }
+        .cart-table td { padding: 12px 10px; border-bottom: 1px solid #f1f2f6; }
+
+        /* INPUT GRUP BARU UNTUK GROSIR */
+        .row-grosir-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+
+        /* PREVIEW STRUK NOTA KASIR */
+        #nota-container {
+            background: #fff; padding: 15px; border-radius: 8px; border: 1px dashed #2f3542; font-family: 'Courier New', Courier, monospace; color: #000; font-size: 12px;
+        }
+        .nota-header { text-align: center; border-bottom: 1px dashed #333; padding-bottom: 8px; margin-bottom: 8px; }
+        .nota-total { border-top: 1px dashed #333; margin-top: 8px; padding-top: 6px; text-align: right; font-weight: bold; font-size: 13px;}
+        .struk-row-input { margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .struk-input-box { width: 85px; padding: 4px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+
+        /* ACTION BUTTONS */
+        button.action-btn { width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        .btn-success { background: linear-gradient(135deg, #10ac84 0%, #05c46b 100%); color: white; box-shadow: 0 4px 10px rgba(5, 196, 107, 0.3); }
+        .btn-blue { background: linear-gradient(135deg, #2980b9 0%, #1e3799 100%); color: white; box-shadow: 0 4px 10px rgba(30, 55, 153, 0.3); }
+        .btn-orange { background: linear-gradient(135deg, #ff9f43 0%, #ee5253 100%); color: white; box-shadow: 0 4px 10px rgba(238, 82, 83, 0.3); }
+        .btn-secondary { background: #747d8c; color: white; }
+
+        /* REKAP MODAL */
+        .laporan-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .summary-box { background: #f1f2f6; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 800; border-left: 5px solid var(--primary); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+
+        .no-print { display: inline-block; }
+        @media print {
+            body * { visibility: hidden; }
+            #nota-container, #nota-container * { visibility: visible; }
+            #nota-container { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🛒 Toko Ayi Toys & ATK</h1>
+    <p>Aplikasi Kasir Pintar - Fitur Penjualan Multi-Satuan (Pcs, Pak & Lusin)</p>
+</header>
+
+<div class="container">
+    <div class="folder-navigation">
+        <button class="folder-btn active" onclick="bukaFolder(event, 'folder-kasir')">🛍️ ETALASE KASIR</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-input')">➕ DAFTAR BARANG BARU</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-stok')">📦 STOK GUDANG TOKO</button>
+        <button class="folder-btn" onclick="bukaFolder(event, 'folder-laporan')">📈 LAPORAN UNTUNG</button>
+    </div>
+
+    <div id="folder-kasir" class="folder-content active">
+        <div class="kasir-layout">
+            
+            <div>
+                <div class="card">
+                    <h3 class="section-title">🔍 Scanner & Pencarian Cepat</h3>
+                    <button class="btn-kamera" id="btn-toggle-camera" onclick="toggleKameraHP('KASIR')">📸 Nyalakan Kamera Scan HP</button>
+                    <div id="reader"></div>
+                    <input type="text" id="scanner-input" class="search-box" placeholder="Ketik nama produk atau scan barcode di sini..." onkeypress="handleBarcodeScan(event)" oninput="filterKatalog()">
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🏪 Etalase Produk Toko</h3>
+                    <div class="filter-scroll" id="katalog-filter-badges"></div>
+                    <div class="katalog-grid" id="katalog-produk-area"></div>
+                </div>
+
+                <div class="card">
+                    <h3 class="section-title">🛒 Keranjang Belanja Konsumen</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="cart-table">
+                            <thead>
+                                <tr><th>Produk</th><th style="text-align:center; width:100px;">Satuan</th><th style="text-align:center; width:60px;">Qty</th><th style="text-align:right;">Subtotal</th><th style="width:10px;"></th></tr>
+                            </thead>
+                            <tbody id="keranjang-list-kasir"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h3 class="section-title">📄 Lembar Struk Pembayaran</h3>
+                    <div id="nota-container">
+                        <div class="nota-header">
+                            <h3 style="margin:0; font-size:14px;">TOKO AYI TOYS & ATK</h3>
+                            <p style="margin:2px 0;">Kelontongan, Mainan & Alat Kantor<br>Cicalengka, Jawa Barat</p>
+                            <p style="text-align: left; font-size: 10px; margin-top: 10px;" id="nota-waktu"></p>
+                        </div>
+                        <table style="width: 100%; font-family: monospace; font-size:11px;">
+                            <thead>
+                                <tr style="border-bottom: 1px dashed #333;">
+                                    <th style="padding: 2px 0; text-align: left; background:none; color:#000;">Item</th>
+                                    <th style="padding: 2px 0; text-align: center; background:none; color:#000;">Qty</th>
+                                    <th style="padding: 2px 0; text-align: right; background:none; color:#000;">Total</th>
+                                    <th class="no-print" style="background:none; width: 2px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="nota-items"></tbody>
+                        </table>
+                        
+                        <div class="struk-row-input" style="margin-top:10px;">
+                            <span>Metode:</span>
+                            <div>
+                                <select id="nota-metode-bayar" class="no-print" style="width:90px; padding:2px;" onchange="toggleMetodeBayar()">
+                                    <option value="TUNAI">TUNAI</option><option value="QRIS">QRIS</option><option value="TRANSFER">TRANSFER</option>
+                                </select>
+                                <span id="nota-metode-Cetak" style="display: none;">TUNAI</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input">
+                            <span>Potongan/Diskon:</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-diskon-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-diskon-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="struk-row-input" id="row-cash-tunai">
+                            <span>Bayar (Cash):</span>
+                            <div>
+                                <span class="no-print">Rp </span><input type="number" id="nota-cash-input" class="struk-input-box no-print" value="0" oninput="renderNota()">
+                                <span id="nota-cash-Cetak" style="display: none;">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="nota-total" id="nota-total-bayar">TOTAL: Rp 0</div>
+                        <div class="nota-total" id="nota-kembalian" style="border:none; padding-top:2px;">KEMBALIAN: Rp 0</div>
+                        <div class="nota-total" style="color: #10ac84; font-size: 10px; font-weight: normal; border: none; padding: 0;" id="nota-estimasi-untung"></div>
+                        <div class="nota-footer"><p>Terima Kasih Atas Kunjungan Anda!<br>Toko Berkah, Belanja Lancar Jaya</p></div>
+                    </div>
+
+                    <button class="action-btn btn-blue" onclick="window.print()">🖨️ Cetak Kertas Nota Struk</button>
+                    <button class="action-btn btn-orange" onclick="downloadNota()">📸 Unduh File Gambar Struk</button>
+                    <button class="action-btn btn-success" onclick="simpanTransaksiKeLaporan()">💾 Selesai & Simpan Buku Untung</button>
+                    <button class="action-btn btn-secondary" style="font-size:12px; padding:8px;" onclick="kosongkanKeranjang()">Kosongkan Keranjang</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="folder-input" class="folder-content">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <div class="card" style="background: #ebf8ff; border: 1px dashed var(--primary);">
+                <h4 style="margin:0 0 10px 0; color:var(--primary);">➕ Buat Kategori/Grup Jualan Baru</h4>
+                <div style="display:flex; gap: 8px;">
+                    <input type="text" id="new-category-input" placeholder="Contoh: ATK, Mainan Cowok, Sembako" style="padding:10px; flex:1; border:1px solid #ccc; border-radius:8px;">
+                    <button style="width:auto; padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;" onclick="tambahKategoriBaru()">Simpan Kategori</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3 id="form-title" class="section-title">Formulir Pendaftaran Barang (Multi-Satuan)</h3>
+                <form id="product-form">
+                    <input type="hidden" id="product-index">
+                    
+                    <div class="form-group"><label>Kategori Barang</label><select id="kategori_pilih" required></select></div>
+                    
+                    <div class="form-group">
+                        <label>Kode Barcode Unik</label>
+                        <button type="button" class="btn-kamera" id="btn-toggle-camera-input" onclick="toggleKameraHP('INPUT')" style="margin-bottom:8px; background:linear-gradient(135deg, #20bf6b 0%, #05c46b 100%);">📸 Scan Barcode via Kamera HP</button>
+                        <div id="reader-input"></div>
+                        <input type="text" id="kode" required placeholder="Hasil scan barcode...">
+                    </div>
+
+                    <div class="form-group"><label>Nama Lengkap Produk</label><input type="text" id="nama" required placeholder="Contoh: Pulpen Kenko Gel"></div>
+                    
+                    <div class="form-group"><label>💵 HARGA SATUAN (PCS)</label></div>
+                    <div class="row-grosir-inputs">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pcs</label><input type="number" id="harga_beli" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual Eceran Pcs</label><input type="number" id="harga_satuan" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>📦 HARGA PER PACK / DUS</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #ff9f43;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Pak</label><input type="number" id="harga_beli_pack" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Pak</label><input type="number" id="harga_jual_pack" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>🧺 HARGA PER LUSIN (12 Pcs)</label></div>
+                    <div class="row-grosir-inputs" style="border-left-color: #10ac84;">
+                        <div><label style="font-size:11px;">Harga Modal Beli Lusin</label><input type="number" id="harga_beli_lusin" required value="0"></div>
+                        <div><label style="font-size:11px;">Harga Jual per Lusin</label><input type="number" id="harga_jual_lusin" required value="0"></div>
+                    </div>
+
+                    <div class="form-group"><label>Harga Grosir Pcs (Jika beli minimal 3 pcs biasa)</label><input type="number" id="harga_grosir" required value="0"></div>
+                    <div class="form-group"><label>Jumlah Sisa Stok Gudang (Hit
