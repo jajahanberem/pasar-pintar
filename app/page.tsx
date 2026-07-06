@@ -8,6 +8,7 @@ interface Product {
   kode: string
   nama: string
   harga_beli: number
+  harga_beli_losin: number
   harga_satuan: number
   harga_grosir: number
   stok: number
@@ -44,6 +45,7 @@ export default function Page() {
     kode: '',
     nama: '',
     harga_beli: '',
+    harga_beli_losin: '',
     harga_satuan: '',
     harga_grosir: '',
     stok: ''
@@ -99,6 +101,7 @@ export default function Page() {
       kode: formData.kode,
       nama: formData.nama,
       harga_beli: parseInt(formData.harga_beli),
+      harga_beli_losin: parseInt(formData.harga_beli_losin),
       harga_satuan: parseInt(formData.harga_satuan),
       harga_grosir: parseInt(formData.harga_grosir),
       stok: parseInt(formData.stok)
@@ -111,6 +114,7 @@ export default function Page() {
       kode: '',
       nama: '',
       harga_beli: '',
+      harga_beli_losin: '',
       harga_satuan: '',
       harga_grosir: '',
       stok: ''
@@ -581,7 +585,7 @@ export default function Page() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-bold mb-2">Harga Modal Beli (Rp)</label>
+                    <label className="block font-bold mb-2">Harga Modal Beli Satuan (Rp)</label>
                     <input
                       type="number"
                       value={formData.harga_beli}
@@ -590,6 +594,19 @@ export default function Page() {
                       required
                     />
                   </div>
+                  <div>
+                    <label className="block font-bold mb-2">Harga Modal Beli Losin/Pack (Rp)</label>
+                    <input
+                      type="number"
+                      value={formData.harga_beli_losin}
+                      onChange={(e) => setFormData({ ...formData, harga_beli_losin: e.target.value })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold mb-2">Harga Jual Satuan (Rp)</label>
                     <input
@@ -600,9 +617,6 @@ export default function Page() {
                       required
                     />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold mb-2">Harga Grosir (Rp)</label>
                     <input
@@ -613,16 +627,17 @@ export default function Page() {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block font-bold mb-2">Jumlah Stok Awal</label>
-                    <input
-                      type="number"
-                      value={formData.stok}
-                      onChange={(e) => setFormData({ ...formData, stok: e.target.value })}
-                      className="w-full px-4 py-2 border rounded-lg"
-                      required
-                    />
-                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-2">Jumlah Stok Awal</label>
+                  <input
+                    type="number"
+                    value={formData.stok}
+                    onChange={(e) => setFormData({ ...formData, stok: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    required
+                  />
                 </div>
 
                 <button
@@ -649,6 +664,8 @@ export default function Page() {
                       <th className="text-left p-3 font-bold">Kategori</th>
                       <th className="text-left p-3 font-bold">Kode Barcode</th>
                       <th className="text-left p-3 font-bold">Nama Produk</th>
+                      <th className="text-right p-3 font-bold text-xs">Modal Satuan</th>
+                      <th className="text-right p-3 font-bold text-xs">Modal Losin</th>
                       <th className="text-center p-3 font-bold">Sisa Stok</th>
                       <th className="text-center p-3 font-bold">Tindakan</th>
                     </tr>
@@ -659,6 +676,8 @@ export default function Page() {
                         <td className="p-3">{product.kategori}</td>
                         <td className="p-3 font-mono text-xs">{product.kode}</td>
                         <td className="p-3">{product.nama}</td>
+                        <td className="text-right p-3 text-xs">Rp {product.harga_beli.toLocaleString('id-ID')}</td>
+                        <td className="text-right p-3 text-xs">Rp {product.harga_beli_losin.toLocaleString('id-ID')}</td>
                         <td className="text-center p-3 font-bold">{product.stok}</td>
                         <td className="text-center p-3">
                           <button
